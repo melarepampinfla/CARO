@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Current Time</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+      color: #f8fafc;
+    }
+
+    main {
+      text-align: center;
+      padding: 2rem;
+    }
+
+    h1 {
+      font-size: 0.875rem;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #94a3b8;
+      margin-bottom: 1.5rem;
+    }
+
+    #time {
+      font-size: clamp(3rem, 12vw, 6rem);
+      font-weight: 300;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.05em;
+      line-height: 1.1;
+    }
+
+    #date {
+      margin-top: 1rem;
+      font-size: 1.125rem;
+      color: #cbd5e1;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Current Time</h1>
+    <div id="time" aria-live="polite">--:--:--</div>
+    <div id="date"></div>
+  </main>
+
+  <script>
+    const timeEl = document.getElementById("time");
+    const dateEl = document.getElementById("date");
+
+    function updateClock() {
+      const now = new Date();
+
+      timeEl.textContent = now.toLocaleTimeString(undefined, {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      });
+
+      dateEl.textContent = now.toLocaleDateString(undefined, {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    }
+
+    updateClock();
+    setInterval(updateClock, 1000);
+  </script>
+</body>
+</html>
