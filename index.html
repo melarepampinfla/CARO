@@ -67,6 +67,51 @@
       animation: fadeInUp 0.8s ease-out 0.15s both;
     }
 
+    .mode-selector {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+      animation: fadeInUp 0.8s ease-out 0.2s both;
+    }
+
+    .mode-selector label {
+      font-size: 0.875rem;
+      color: #94a3b8;
+      letter-spacing: 0.05em;
+    }
+
+    .mode-selector select {
+      appearance: none;
+      background: rgba(30, 41, 59, 0.8);
+      color: #f8fafc;
+      border: 1px solid #475569;
+      border-radius: 0.5rem;
+      padding: 0.5rem 2rem 0.5rem 0.75rem;
+      font-size: 0.875rem;
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M3 4.5L6 7.5L9 4.5'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.6rem center;
+    }
+
+    .mode-selector select:hover,
+    .mode-selector select:focus {
+      border-color: #94a3b8;
+      outline: none;
+    }
+
+    .clock-view {
+      min-height: clamp(12rem, 40vw, 18rem);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .clock-view[hidden] {
+      display: none;
+    }
+
     #time {
       font-size: clamp(3rem, 12vw, 6rem);
       font-weight: 300;
@@ -79,6 +124,55 @@
 
     #time.tick {
       animation: glow 4s ease-in-out infinite, tick 0.4s ease-out;
+    }
+
+    .analog-clock {
+      width: clamp(12rem, 40vw, 18rem);
+      height: clamp(12rem, 40vw, 18rem);
+      filter: drop-shadow(0 0 24px rgba(148, 163, 184, 0.2));
+    }
+
+    .clock-face {
+      fill: rgba(30, 41, 59, 0.6);
+      stroke: #475569;
+      stroke-width: 2;
+    }
+
+    .clock-tick {
+      stroke: #64748b;
+      stroke-width: 2;
+      stroke-linecap: round;
+    }
+
+    .clock-tick.major {
+      stroke: #94a3b8;
+      stroke-width: 3;
+    }
+
+    .hand {
+      stroke-linecap: round;
+      transform-origin: 100px 100px;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .hour-hand {
+      stroke: #f8fafc;
+      stroke-width: 4;
+    }
+
+    .minute-hand {
+      stroke: #cbd5e1;
+      stroke-width: 3;
+    }
+
+    .second-hand {
+      stroke: #38bdf8;
+      stroke-width: 1.5;
+      transition: transform 0.1s linear;
+    }
+
+    .center-dot {
+      fill: #38bdf8;
     }
 
     #date {
@@ -100,17 +194,71 @@
 <body>
   <main>
     <h1>Current Time</h1>
-    <div id="time" aria-live="polite">--:--:--</div>
+
+    <div class="mode-selector">
+      <label for="mode">Display</label>
+      <select id="mode" aria-label="Clock display mode">
+        <option value="digital">Digital</option>
+        <option value="analog">Analog</option>
+      </select>
+    </div>
+
+    <div id="digital-view" class="clock-view">
+      <div id="time" aria-live="polite">--:--:--</div>
+    </div>
+
+    <div id="analog-view" class="clock-view" hidden>
+      <svg class="analog-clock" viewBox="0 0 200 200" role="img" aria-label="Analog clock">
+        <circle class="clock-face" cx="100" cy="100" r="94" />
+        <g id="ticks"></g>
+        <line class="hand hour-hand" x1="100" y1="100" x2="100" y2="58" />
+        <line class="hand minute-hand" x1="100" y1="100" x2="100" y2="42" />
+        <line class="hand second-hand" x1="100" y1="108" x2="100" y2="32" />
+        <circle class="center-dot" cx="100" cy="100" r="4" />
+      </svg>
+    </div>
+
     <div id="date"></div>
   </main>
 
   <script>
+    const modeEl = document.getElementById("mode");
+    const digitalView = document.getElementById("digital-view");
+    const analogView = document.getElementById("analog-view");
     const timeEl = document.getElementById("time");
     const dateEl = document.getElementById("date");
+    const hourHand = document.querySelector(".hour-hand");
+    const minuteHand = document.querySelector(".minute-hand");
+    const secondHand = document.querySelector(".second-hand");
+    const ticksGroup = document.getElementById("ticks");
 
-    function updateClock() {
-      const now = new Date();
+    function buildTicks() {
+      for (let i = 0; i < 12; i++) {
+        const angle = (i * 30 - 90) * (Math.PI / 180);
+        const inner = i % 3 === 0 ? 78 : 84;
+        const outer = 90;
+        const x1 = 100 + inner * Math.cos(angle);
+        const y1 = 100 + inner * Math.sin(angle);
+        const x2 = 100 + outer * Math.cos(angle);
+        const y2 = 100 + outer * Math.sin(angle);
+        const tick = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        tick.setAttribute("x1", x1);
+        tick.setAttribute("y1", y1);
+        tick.setAttribute("x2", x2);
+        tick.setAttribute("y2", y2);
+        tick.setAttribute("class", i % 3 === 0 ? "clock-tick major" : "clock-tick");
+        ticksGroup.appendChild(tick);
+      }
+    }
 
+    function setMode(mode) {
+      const isDigital = mode === "digital";
+      digitalView.hidden = !isDigital;
+      analogView.hidden = isDigital;
+      modeEl.value = mode;
+    }
+
+    function updateDigital(now) {
       timeEl.textContent = now.toLocaleTimeString(undefined, {
         hour: "2-digit",
         minute: "2-digit",
@@ -120,6 +268,26 @@
       timeEl.classList.remove("tick");
       void timeEl.offsetWidth;
       timeEl.classList.add("tick");
+    }
+
+    function updateAnalog(now) {
+      const hours = now.getHours() % 12;
+      const minutes = now.getMinutes();
+      const seconds = now.getSeconds();
+
+      hourHand.style.transform = `rotate(${hours * 30 + minutes * 0.5}deg)`;
+      minuteHand.style.transform = `rotate(${minutes * 6 + seconds * 0.1}deg)`;
+      secondHand.style.transform = `rotate(${seconds * 6}deg)`;
+    }
+
+    function updateClock() {
+      const now = new Date();
+
+      if (modeEl.value === "digital") {
+        updateDigital(now);
+      } else {
+        updateAnalog(now);
+      }
 
       dateEl.textContent = now.toLocaleDateString(undefined, {
         weekday: "long",
@@ -129,6 +297,13 @@
       });
     }
 
+    modeEl.addEventListener("change", () => {
+      setMode(modeEl.value);
+      updateClock();
+    });
+
+    buildTicks();
+    setMode("digital");
     updateClock();
     setInterval(updateClock, 1000);
   </script>
