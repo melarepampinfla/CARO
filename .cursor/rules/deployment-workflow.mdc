@@ -1,0 +1,32 @@
+---
+description: Vercel deployment workflow. Commit, push, present URL. Never GitHub Pages.
+alwaysApply: true
+---
+
+# Project Workflow
+
+This project uses the following workflow:
+
+Local Files
+→ Git Commit (save milestone)
+→ Git Push to GitHub
+→ Automatic deployment by Vercel
+→ Public URL updated
+
+Never create GitHub Releases.
+
+Never publish packages.
+
+Never use GitHub Pages.
+
+The only deployment target for this project is Vercel.
+
+When the user asks to publish, launch, deploy, release or put the application online:
+
+1. Save pending work with a git commit if necessary.
+2. Push the latest commit to GitHub.
+3. Wait for Vercel to deploy automatically.
+4. Verify deployment if possible.
+5. Present the Vercel URL.
+
+Assume that pushing to GitHub is the deployment trigger.
